@@ -83,9 +83,9 @@ class administrator : public Book, public studentdetails{
     }
 
 
-
-    void findbook(){                         // to find a book
+bool findbook(){                         // to find a book
         string name;
+        
         fh.close();
         fh.clear();
         cout<<"Enter name of book you want to find"<<endl;
@@ -95,7 +95,7 @@ class administrator : public Book, public studentdetails{
         fh.open("booksagain.dat",ios::in|ios::out|ios::binary);
         if (!fh.is_open()) {
             cerr << "Error opening file for reading" << endl;
-            return;
+            return false;
         }
         string line;
         
@@ -106,26 +106,114 @@ class administrator : public Book, public studentdetails{
             
             if(pos != string::npos){
                 found = true;
-                cout<<"book available"<<endl;
-                cout<<line<<endl;
+                // cout<<"book available"<<endl;
+                 cout<<line<<endl;
                 
+                // cout<<"Do you want to borrow the book? Enter y for yes and n for no"<<endl;
+                // char ch;
+                // cin>>ch;
+                // if(ch=='y'){
+                //     int pos1=line.find(',');
+                //     int pos2=line.find(',',pos1+1);
+                //     int pos3=line.find(',',pos2+1);
+                //     int count=line.substr(pos3+1).length();
+                //     int quantity= stoi(line.substr(pos3+1));
+                //     if(quantity>0){
+                //         quantity--;
+                //         line.replace(pos3+1,count,to_string(quantity));
+                //         fh.clear();
+                //         fh.seekp(0);
+                //         fh<<line<<endl;
+                //         cout<<"Book borrowed successfully"<<endl;
+                //         fh.close();
+    
+                }
                
+            
+        
+        else{
+            cout<<"Book not found"<<endl;
         }
-       
+        return found;
+         break;
 
 
-    }
-    if(!found){
-        cout<<"Book not found"<<endl;
-        fh.close();
     }
     
 }
+
+ 
+
+
 void borrowbook(){
-    findbook();
+    char ch;
     
+    if(findbook()){
+        fh.close();
+        fh.clear();
+        
+        fh.open("booksagain.dat",ios::in|ios::out|ios::binary);
+        if (!fh.is_open()) {
+            cerr << "Error opening file for reading" << endl;
+            return;
+        }
+        while(getline(fh,line)){
+        
+        int pos1=line.find(',');
+       
+        int pos2=line.find(',',pos1+1);
+        
+        int pos3=line.find(',',pos2+1);
+        
+        int count=line.substr(pos3+1).length();
+        
+        int quantity= stoi(line.substr(pos3+1));
+        if(quantity>0){
+            cout<<"Do you want to borrow the book";
+            cin>>ch;
+            if(ch=='y'){
+                 quantity--;
+                        line.replace(pos3+1,count,to_string(quantity));
+                        fh.clear();
+                        fh.seekp(0);
+                        fh<<line<<endl;
+                        cout<<"Book borrowed successfully"<<endl;
+                        fh.close();
+        }
+        else{
+            cout<<"returning...";
+            return;
+        }
+    }
+    else{
+        cout<<"Book currently not in stock"<<endl;
+    }}
+    // int checkbook=0;
+    // if(checkbook>0){
+    //      cout<<"Do you want to borrow the book? Enter y for yes and n for no"<<endl;
+    //             char ch;
+    //             cin>>ch;
+    //             if(ch=='y'){
+    //                 int pos1=line.find(',');
+    //                 int pos2=line.find(',',pos1+1);
+    //                 int pos3=line.find(',',pos2+1);
+    //                 int count=line.substr(pos3+1).length();
+                   
+                    
+    //                 if(checkbook>0){
+    //                     checkbook--;
+    //                     line.replace(pos3,count,to_string(checkbook));
+    //                     fh.clear();
+    //                     fh.seekp(0);
+    //                     fh<<line<<endl;
+    //                     cout<<"Book borrowed successfully"<<endl;
+    //                     fh.close();
+    
+    //             }}
+                
+    //         }
 
-}
+}}
 void returnbook(){
     string brname;
     line="";
@@ -185,7 +273,7 @@ void enterStudent(){ // To enter student details
     
 
     void findStudent(string id) { // To find a student
-       
+       bool found1 = false;
         fh2.close();
         fh2.clear();
         
@@ -201,15 +289,16 @@ void enterStudent(){ // To enter student details
         // Iterate through file
         while (getline(fh2, line)) {
             int pos = line.find(id);
-            if (pos != string::npos) {
-                found = true;
+            if (pos != string::npos){
+                found1 = true;
                 cout << "Student found:" << endl;
                 cout << line << endl;
-                break;
+               
             }
+            
         }
         
-        if (!found) {
+        if(!found1) {
             cout << "Student not found" << endl;
         }
         
@@ -229,7 +318,7 @@ void enterStudent(){ // To enter student details
         cin>>verifypassword;
         if(verifypassword==password){
             while(choice!=7){
-            cout<<"Choose option"<<endl<<"1. Add book"<<endl<<"2. Show book"<<endl<<"3. Find books"<<endl<<"4. Add student"<<endl<<"5. Show students"<<endl<<"6. Find students"<<endl<<"7. Exit";
+            cout<<"Choose option"<<endl<<"1. Add book"<<endl<<"2. Show book"<<endl<<"3. Borrow book"<<endl<<"4. Add student"<<endl<<"5. Show students"<<endl<<"6. Find students"<<endl<<"7. Exit";
             cin>>choice;
             switch(choice){
                 case 1:
@@ -239,7 +328,7 @@ void enterStudent(){ // To enter student details
                     showbooks();
                     break;
                 case 3:
-                    findbook();
+                    borrowbook();
                     break;
                 case 4:
                     addstudent();
@@ -269,13 +358,14 @@ class student:public administrator{
         cin>>tempstudentid;
         findStudent(tempstudentid);
         if(found){
+
             cout<<"Welcome to library"<<endl;
             while(1){
                 cout<<"Choose option"<<endl<<"1. Issue book"<<endl<<"2. Return book"<<endl<<"3. Exit"<<endl;
                 cin>>choice;
                 switch(choice){
                     case 1:
-                        findbook();
+                        borrowbook();
                         break;
                     case 2:
                         returnbook();
@@ -288,13 +378,17 @@ class student:public administrator{
                 }
             }
         }
+        
 
 
     }
+    void borrowbook2(){
+                borrowbook();
+            }
 };
 
 
 int main(){
-    student s;
+    administrator a;
     
 } 
