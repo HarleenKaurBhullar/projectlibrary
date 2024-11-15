@@ -84,9 +84,10 @@ class administrator : public Book, public studentdetails{
     }
 
 
-bool findbook(){                         // to find a book
+string findbook(){                         // to find a book
         string name;
         char ch;
+        string bookno;
         fstream tempfile;
         tempfile.open("tempfile1.dat",ios::in|ios::out|ios::binary|ios::trunc);
         if(!tempfile.is_open()){
@@ -113,6 +114,7 @@ bool findbook(){                         // to find a book
             int pos = line.find(name);
             if (pos != string::npos){
                 found = true;
+                
                 cout << "Book found:" << endl;
                 cout << line << endl;
                 int pos1=line.find(',');
@@ -132,7 +134,7 @@ bool findbook(){                         // to find a book
                
                  quantity--;
                 line.replace(pos3+1,count,to_string(quantity));
-                        
+                    bookno=line.substr(pos2+1,3);
                         
                         
             }  else{
@@ -156,15 +158,19 @@ if(found){
             }
 if(!found) {
             cout << "Book not found" << endl;
-            remove("tempfile.1dat");
+            remove("tempfile1.dat");
+            return 0;
         }
         
         fh.close();
-        return found;
+        return bookno;
+        
 }
 
  
+void borrowbook(){
 
+}
 
 // string borrowbook(){
 //     char ch;
@@ -394,9 +400,11 @@ class student:public administrator{
                 cin>>choice;
                 switch(choice){
                     case 1:
+                    
                         borrowbook2();
                         break;
                     case 2:
+                    findbook();
                         returnbook();
                         break;
                     case 3:
@@ -412,27 +420,45 @@ class student:public administrator{
 
     }
     void borrowbook2(){
-        string line1,line2;
-                line2=findbook();
-                cout<<line2;
-                fh2.open("studentdetails.dat",ios::in|ios::out|ios::binary);
+        string line1="",line2="",line3="";
+        int valid;
+        bool yes=false;
+        fh2.open("studentdetails.dat",ios::in|ios::out|ios::binary);
         if(!fh2.is_open()){
             cerr << "Error opening file studentdetails" << endl;
         }
+        
+        
+        
+        fstream tempstufile;
+        tempstufile.open("tempstufile1.dat",ios::in|ios::out|ios::binary|ios::trunc);    
          while(getline(fh2,line1)){
+            
             int pos=line1.find(tempstudentid);
+            
             if(pos!=std::string::npos){
-           
+                yes=true;
+            int pos0=line1.rfind(',');
+            valid=stoi(line1.substr(pos0+1));
+            if(valid==0){
+            line2=findbook();
             int pos2=line1.find(',',pos);
             
             int pos3=line1.find(',',pos2+1);
             
             line1.replace(pos3+1,line2.length(),line2);
-            fh2.clear();
+            }
+            }
+            tempstufile<<line1<<endl;
+         }
+         fh2.close();
+         tempstufile.close();
+         remove("studentdetails.dat");
+         rename("tempstufile1.dat","studentdetails.dat");
+         if(valid!=0){
+            cout<<"You already have one book issued. Please return it before borrowing another book."<<endl;
+         }
 
-            fh2.seekp(0);
-            fh2<<line1<<endl;
-            }}
         }
 };
 
