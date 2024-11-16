@@ -2,8 +2,8 @@
 using namespace std;
 #include <string>
 #include <fstream>
-
-class Book{
+#include <cctype>
+class Book{                      //class book to declare attributes of books
     public:
     fstream fh;
     string str1[20];
@@ -13,42 +13,51 @@ class Book{
     string author;
     string bookno;
     int quantity;
-    Book(){
-        fh.open("booksagain.dat",ios::in|ios::out|ios::app|ios::binary);
-        if(!fh.is_open()){
+    Book(){                      //constructor books to initialise file to store book data
+        fh.open("booksagain.dat",ios::in|ios::out|ios::app|ios::binary);       //opening a binary file called booksagain.dat to 
+        if(!fh.is_open()){                                                     //store details of books
             cerr << "Error opening file books" << endl;
         }
     }
 
 };
 
-class studentdetails{
+class studentdetails{            //class student details to declare attributes of students data
     public:
     fstream fh2;
     string studentname;
     string studentid;
     string studentprogram;
-    studentdetails(){
-        fh2.open("studentdetails.dat",ios::in|ios::out|ios::app|ios::binary);
-        if(!fh2.is_open()){
+    studentdetails(){             //constructor student details to initialize file
+        fh2.open("studentdetails.dat",ios::in|ios::out|ios::app|ios::binary);            //opening a binary file called studentdetails.dat 
+        if(!fh2.is_open()){                                                              //to store details of student
             cerr << "Error opening file studentdetails" << endl;
         }
     }
 };
-class administrator : public Book, public studentdetails{
-    public:
+
+string tolowercase(string s) {           //A function to convert strings to lowercase
+        for(char c: s){
+            c = tolower(c);
+        }
+        return s;
+    }
+
+class administrator : public Book, public studentdetails{             //Administartor class attribute to handle all administartion related 
+    public:                                                           //operations
     bool found1 = false;
     int password=1234;
     int verifypassword;
     int choice;
     string line;
     bool found = false;
-    void enter(){                            
+    void enter(){                                                     //function for administrator to enter name of the book
         cout<<"Enter name of book: ";
         getline(cin,bookname);
-        
+        bookname=tolowercase(bookname);
         cout<<"Enter author of book: ";
         getline(cin,author);
+        author=tolowercase(author);
         cout<<"Enter book number: ";
         cin>>bookno;
         cout<<"Enter quantity of book: ";
@@ -57,9 +66,9 @@ class administrator : public Book, public studentdetails{
         cin.ignore();
     }
 
-    void addbook(){ 
-        fh.close();
-        fh.open("booksagain.dat",ios::in|ios::out|ios::app|ios::binary);                      //to add book
+    void addbook(){                                                    //function to add book to binary file that stores books using
+        fh.close();                                                    //previous enter function
+        fh.open("booksagain.dat",ios::in|ios::out|ios::app|ios::binary);                      
         cout<<"Enter no of books:";
         cin>>n;
         cin.ignore();
@@ -84,7 +93,7 @@ class administrator : public Book, public studentdetails{
     }
 
 
-string findbook(string name) {
+string findbook(string name) {             //to find a book
     fh.close();
     fh.clear();
     fh.open("booksagain.dat", ios::in | ios::binary);
@@ -108,19 +117,20 @@ string findbook(string name) {
 
 
  
-void deletebook() {
-    string deline, line;
+void deletebook() {                         //function to delete record of a book
+    string deline, line;  
     fstream tempfile;
     bool found = false;
 
     cout << "Enter the name of the book to delete: ";
     cin.ignore();
     getline(cin, deline);
+    deline = tolowercase(deline);
 
     // Check if the book exists
     fh.close();
     fh.clear();
-    if (findbook(deline).empty()) {
+    if (findbook(deline).empty()) {         //if book not found return
         cout << "Book not found!" << endl;
         return;
     }
@@ -133,7 +143,7 @@ void deletebook() {
     }
 
     // Open temporary file for writing
-    tempfile.open("temp.dat", ios::out | ios::binary);
+    tempfile.open("temp.dat", ios::out | ios::binary);          //initializing a temporary file to store data
     if (!tempfile.is_open()) {
         cerr << "Error opening temporary file" << endl;
         fh.close();
@@ -141,7 +151,7 @@ void deletebook() {
     }
 
     // Read and write lines, excluding the one to be deleted
-    while (getline(fh, line)) {
+    while (getline(fh, line)) {                        //if book is found delete the book and rewrite the file
         if (line.find(deline) == string::npos) {
             tempfile << line << endl; // Copy lines that do not match
         } else {
@@ -161,7 +171,7 @@ void deletebook() {
     }
 }
 
-void deletestudent(){
+void deletestudent(){                   //function to delete record of a student
     string tempid1,string2;
     fstream tempstufile;
     bool found = false;
@@ -175,14 +185,14 @@ void deletestudent(){
      if(!fh2.is_open()){
         cout<<"Error opening students file";
     }
-    tempstufile.open("tempstu.dat",ios::out|ios::binary|ios::trunc);
+    tempstufile.open("tempstu.dat",ios::out|ios::binary|ios::trunc);     //initialization of a temporary file to store details of student
     if(!tempstufile.is_open()){
         cerr<<"Error opening tempstu file";
         return;
     }
    
 
-    while(getline(fh2,string2)){
+    while(getline(fh2,string2)){          //skip over the line of student if found                 
         int pos=string2.find(tempid1);
         if(pos!=string::npos){
             found=true;
@@ -196,13 +206,13 @@ void deletestudent(){
     fh2.close();
     tempstufile.close();
     tempstufile.clear();
-    if(found){
+    if(found){                        //rewriting previous file with new file
         cout<<"Student deleted successfully";
        
     remove("studentdetails.dat");
     rename("tempstu.dat","studentdetails.dat");
     }
-    else{
+    else{                           //if there is no matching student in file
         cout<<"Student not found";
         remove("tempstu.dat");
     }
@@ -211,7 +221,7 @@ void deletestudent(){
    
 }
 
-void modifyquantity(){
+void modifyquantity(){              //for administrator to modify the quantity of books
     string qbookno,qline;
     fstream tempfile;
     bool found=false;
@@ -260,15 +270,17 @@ void modifyquantity(){
 void enterStudent(){ // To enter student details
         cout << "Enter name of student: ";
         getline(cin, studentname);
+        studentname=tolowercase(studentname);
         cout << "Enter ID of student: ";
         getline(cin, studentid);
         cout << "Enter program of student: ";
         getline(cin, studentprogram);
+        studentprogram=tolowercase(studentprogram);
         
         cin.ignore();
     }
 
-    void addstudent() { // To add student
+    void addstudent() { // To add student to binary file of student
         cout << "Enter number of students: ";
         cin >> n;
         cin.ignore();
@@ -308,7 +320,7 @@ void enterStudent(){ // To enter student details
 
     
 
-    void findStudent(string id) { // To find a student
+    void findStudent(string id) { // To find a student through id of student
        
         fh2.close();
         fh2.clear();
@@ -341,7 +353,7 @@ void enterStudent(){ // To enter student details
         fh2.close();
     }
 
-    void adminfindstudent(){
+    void adminfindstudent(){             //for admin to find student
          string id;
          cout << "Enter id of student you want to find: ";
         cin.ignore();
@@ -349,7 +361,7 @@ void enterStudent(){ // To enter student details
         findStudent(id);
     }
 
-    void administratormenu(){
+    void administratormenu(){               //menu for administrator 
         string findname;
         cout<<"To verify you are administrator enter password"<<endl;
         cin>>verifypassword;
@@ -399,10 +411,10 @@ void enterStudent(){ // To enter student details
 // }
 }};
 
-class student:public administrator{
+class student:public administrator{            //a student class that inherits administrator class
     public:
     string tempstudentid;
-    void studentmenu(){
+    void studentmenu(){                       //menu for student
         cout<<"Enter your student id"<<endl;
         cin>>tempstudentid;
         findStudent(tempstudentid);
@@ -434,7 +446,7 @@ class student:public administrator{
 
     }
 
-    void returnbook() {
+    void returnbook() {                         //function to return a book
     string line, bookno;
     fstream tempfile, tempstufile;
     bool bookReturned = false;
@@ -455,7 +467,7 @@ class student:public administrator{
     }
 
     // Process each student record
-    while (getline(fh2, line)) {
+    while (getline(fh2, line)) {          //using id of student to find its record and if student has a book borrowed return book
         size_t pos = line.find(tempstudentid);
         if (pos != string::npos) { // Found student record
             size_t lastComma = line.rfind(',');
@@ -465,7 +477,7 @@ class student:public administrator{
                 cout << "Returning book with ID: " << bookno << endl;
                 line.replace(lastComma + 1, bookno.length(), "0");
                 bookReturned = true;
-            } else {
+            } else {                    //If student has no book issued
                 cout << "You have not borrowed any books." << endl;
             }
         }
@@ -475,31 +487,28 @@ class student:public administrator{
     fh2.close();
     tempstufile.close();
 
-    // Replace the original student details file
-    remove("studentdetails.dat");
+    remove("studentdetails.dat");        // Replace the original student details file
     rename("tempstufile1.dat", "studentdetails.dat");
 
     if (!bookReturned) {
-        return; // Exit if no book was returned
+        return;                         // Exit if no book was returned
     }
 
-    // Open the books file to update the quantity
-    fh.open("booksagain.dat", ios::in | ios::binary);
+    fh.open("booksagain.dat", ios::in | ios::binary);  // Replace the original student details file
     if (!fh.is_open()) {
         cerr << "Error opening booksagain.dat" << endl;
         return;
     }
 
-    // Create a temporary file for books
-    tempfile.open("tempfile1.dat", ios::out | ios::binary | ios::trunc);
+    tempfile.open("tempfile1.dat", ios::out | ios::binary | ios::trunc); 
     if (!tempfile.is_open()) {
         cerr << "Error opening tempfile1.dat" << endl;
         fh.close();
         return;
     }
 
-    // Process each book record
-    while (getline(fh, line)) {
+    
+    while (getline(fh, line)) {           // Process each book record
         size_t pos = line.find(bookno);
         if (pos != string::npos) { // Found the book to update
             size_t lastComma = line.rfind(',');
@@ -514,8 +523,8 @@ class student:public administrator{
     fh.close();
     tempfile.close();
 
-    // Replace the original books file
-    remove("booksagain.dat");
+    
+    remove("booksagain.dat");              // Replace the original books file
     rename("tempfile1.dat", "booksagain.dat");
 }
 
@@ -528,6 +537,7 @@ class student:public administrator{
     cout << "Enter name of the book you want to borrow: ";
     cin.ignore();
     getline(cin, name);
+    name=tolowercase(name);
 
     string bookLine = findbook(name); // Use findbook1 to locate the book
 
@@ -536,8 +546,8 @@ class student:public administrator{
         return "";
     }
 
-    // Parse the found line for details
-    int pos1 = bookLine.find(',');
+    
+    int pos1 = bookLine.find(',');           //to find quaqntity of book
     int pos2 = bookLine.find(',', pos1 + 1);
     int pos3 = bookLine.find(',', pos2 + 1);
 
@@ -565,8 +575,8 @@ class student:public administrator{
             return "";
         }
 
-        // Update book file
-        string line;
+        
+        string line;                 // Update books file with new quantity
         while (getline(fh, line)) {
             if (line == bookLine) {
                 quantity--;
@@ -582,13 +592,13 @@ class student:public administrator{
         rename("tempfile1.dat", "booksagain.dat");
 
         cout << "Book borrowed successfully." << endl;
-        return bookLine.substr(pos2 + 1, pos3 - pos2 - 1); // Return book number
+        return bookLine.substr(pos2 + 1, pos3 - pos2 - 1); 
     } else {
         cout << "Returning to menu..." << endl;
         return "";
     }
 }
-    void borrowbook2(){
+    void borrowbook2(){                    //Function so student can borrow book
         string line1="",line2="",line3="";
         int valid;
         bool yes=false;
@@ -608,7 +618,7 @@ class student:public administrator{
             if(pos!=std::string::npos){
                 yes=true;
             int pos0=line1.rfind(',');
-            valid=stoi(line1.substr(pos0+1));
+            valid=stoi(line1.substr(pos0+1));       //to make sure student does not have a book already issued
             if(valid==0){
             line2=borrowbook();
             int pos2=line1.find(',',pos);
@@ -632,11 +642,11 @@ class student:public administrator{
 };
 
 
-int main(){
+int main(){             //main function
     administrator a;
     student s;
     int choice1;
-    while(choice1!=3){
+    while(choice1!=3){          //main menu
     cout<<"Welcome!"<<endl<<"if you are student type 1"<<endl<<" if you are administrator type 2"<<endl<<"type 3 to exit";
     cin>>choice1;
     switch(choice1){
